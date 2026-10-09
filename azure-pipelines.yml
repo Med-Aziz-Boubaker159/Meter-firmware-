@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: Default
 
 variables:
   fwVersion: '1.0.$(Build.BuildId)'
@@ -15,9 +15,6 @@ stages:
     jobs:
       - job: BuildFirmware
         steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.11'
           - script: python scripts/build.py $(fwVersion)
             displayName: Build firmware package
           - publish: dist
@@ -30,12 +27,9 @@ stages:
     jobs:
       - job: UnitTests
         steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.11'
-          - script: pip install -r requirements.txt
+          - script: python -m pip install -r requirements.txt
             displayName: Install test tools
-          - script: pytest tests --junitxml=test-results.xml
+          - script: python -m pytest tests --junitxml=test-results.xml
             displayName: Run unit tests
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -49,9 +43,6 @@ stages:
     jobs:
       - job: ValidatePackage
         steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.11'
           - download: current
             artifact: firmware-build
           - script: python scripts/validate.py $(Pipeline.Workspace)/firmware-build
