@@ -21,22 +21,23 @@ stages:
             artifact: firmware-build
             displayName: Save build output
 
-  # 2) TEST: run the automatic tests
+    # 2) TEST: run the automatic tests
   - stage: Test
     dependsOn: Build
     jobs:
       - job: UnitTests
         steps:
-          - script: python -m pip install -r requirements.txt
+          - script: |
+              python -m venv .venv
+              .venv/bin/python -m pip install -r requirements.txt
             displayName: Install test tools
-          - script: python -m pytest tests --junitxml=test-results.xml
+          - script: .venv/bin/python -m pytest tests --junitxml=test-results.xml
             displayName: Run unit tests
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
               testResultsFiles: test-results.xml
               testRunTitle: Firmware unit tests
-
   # 3) VALIDATION: check the built package itself
   - stage: Validate
     dependsOn: Test

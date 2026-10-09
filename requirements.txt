@@ -1,1 +1,1 @@
-sudo pacman -Syu python-pytest
+pytest>=8.0
